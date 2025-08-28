@@ -11,17 +11,12 @@ def visualize_score(table_name='final_scores'):
     Lê a tabela de scores do banco de dados e gera mapas de visualização.
     """
     print("🎨 INICIANDO A VISUALIZAÇÃO DOS RESULTADOS...")
-    
-    # Conexão com o banco de dados
     engine = create_engine('postgresql://postgres:senha@localhost:5432/energy')
     
     try:
-        # 1. Carregar o GeoDataFrame com os scores finais
         print(f"1. Lendo scores da tabela '{table_name}'...")
         scores_gdf = gpd.read_postgis(f"SELECT * FROM {table_name}", engine, geom_col='geometry')
         print(f"   ✅ {len(scores_gdf)} células carregadas.")
-
-        # 2. Gerar Heatmap Estático (PNG)
         print("2. Gerando heatmap estático...")
         fig, ax = plt.subplots(1, 1, figsize=(10, 10))
         scores_gdf.to_crs(epsg=3857).plot(
@@ -38,17 +33,14 @@ def visualize_score(table_name='final_scores'):
         plt.savefig(output_path_static, dpi=300, bbox_inches='tight')
         print(f"   ✅ Heatmap estático salvo em: {output_path_static}")
         
-        # 3. Gerar Mapa Interativo (HTML)
         print("3. Gerando mapa interativo...")
         start_time = time.time()
         
-        # --- AQUI ESTÁ A MUDANÇA MAIS IMPORTANTE ---
-        # Seleciona uma amostra aleatória de 5.000 células
-        sample_size = 5000
+        # Amostra aleatória de 2500 células, feito para o chrome rodar
+        sample_size = 2500
         scores_for_folium = scores_gdf.sample(n=sample_size, random_state=42).to_crs(epsg=4326)
         print(f"   ✅ Usando amostra de {len(scores_for_folium)} células para o mapa interativo.")
 
-        # Limpa os dados antes de calcular o centroide
         scores_for_folium = scores_for_folium.dropna(subset=['geometry'])
         scores_for_folium = scores_for_folium[scores_for_folium.is_valid].copy()
         

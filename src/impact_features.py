@@ -1,12 +1,9 @@
-# scripts/impact_features.py
 import geopandas as gpd
 from sqlalchemy import create_engine
 import numpy as np
 
 def extract_impact_features(grid, engine):
     """Extrai features de impacto ambiental"""
-    
-    # DISTÂNCIA A UNIDADES DE CONSERVAÇÃO
     print("   🏞️  Calculando distância a UCs...")
     try:
         ucs = gpd.read_postgis(
@@ -20,8 +17,7 @@ def extract_impact_features(grid, engine):
         print("   ⚠️  UCs não encontradas - pulando")
         grid['dist_to_uc_km'] = np.nan
     
-    # DENSIDADE POPULACIONAL (placeholder)
     print("   👥 Calculando densidade populacional...")
-    grid['pop_density'] = np.nan  # Preencher com WorldPop/IBGE
+    grid['pop_density'] = np.nan
     
     return grid

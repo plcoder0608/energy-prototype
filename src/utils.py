@@ -1,4 +1,3 @@
-# scripts/utils.py
 import requests
 import numpy as np
 from rasterstats import zonal_stats
@@ -13,5 +12,4 @@ def sample_raster(grid, raster_path, stat='mean'):
 
 def download_worldpop(bbox, output_path):
     """Download de dados WorldPop (exemplo)"""
-    # Implementar download da API WorldPop
     pass

@@ -1,4 +1,3 @@
-# scripts/energy_features.py
 import geopandas as gpd
 import requests
 from sqlalchemy import create_engine
@@ -24,12 +23,10 @@ def get_solar_nasa_power(lon, lat):
 
 def extract_energy_features(grid, engine, sample_size=100):
     """Extrai features de energia solar e eólica"""
-    
-    # SOLAR: Usar dados do Atlas Solar existente
+
     print("   ☀️  Processando solar (ANNUAL)...")
     
     try:
-        # Carregar dados solares com a coluna correta ANNUAL
         solar_data = gpd.read_postgis(
             "SELECT ANNUAL, geometry FROM atlas_solar_utm", 
             engine, 
@@ -39,11 +36,9 @@ def extract_energy_features(grid, engine, sample_size=100):
         print(f"   📊 Dados solares carregados: {len(solar_data)} polígonos")
         print(f"   📈 Média de irradiação: {solar_data['ANNUAL'].mean():.1f} kWh/m²/dia")
         
-        # Cruzamento espacial para obter irradiação solar
         print("   🔄 Fazendo cruzamento espacial...")
         grid_solar = gpd.sjoin(grid, solar_data, how='left', predicate='intersects')
         
-        # Calcular média por célula
         solar_means = grid_solar.groupby('cell_id')['ANNUAL'].mean()
         grid['solar_irradiance'] = grid['cell_id'].map(solar_means)
         
@@ -53,11 +48,9 @@ def extract_energy_features(grid, engine, sample_size=100):
         print(f"   ❌ Erro no processamento solar: {e}")
         grid['solar_irradiance'] = np.nan
     
-    # EÓLICA: Placeholder (precisa do Atlas Eólico)
     print("   💨 Processando eólica...")
     grid['wind_potential'] = np.nan
     
-    # NASA POWER para amostra (apenas se necessário)
     missing_solar = grid['solar_irradiance'].isna().sum()
     if missing_solar > 0:
         print(f"   🛰️  NASA POWER para {missing_solar} células sem dados...")
@@ -65,7 +58,6 @@ def extract_energy_features(grid, engine, sample_size=100):
         
         for idx, row in missing_cells.iterrows():
             centroid = row['centroid']
-            # Converter UTM para WGS84 (lat/lon) para NASA POWER
             from pyproj import Transformer
             transformer = Transformer.from_crs("EPSG:32724", "EPSG:4326", always_xy=True)
             lon, lat = transformer.transform(centroid.x, centroid.y)
